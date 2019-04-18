@@ -1,8 +1,8 @@
 package com.example.frienderapp;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -12,15 +12,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    FirebaseAuth mAuth;
+    private MarkerOptions options;
+    private FirebaseAuth mAuth;
+    private Bundle extra;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        extra = getIntent().getBundleExtra("extra");
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -44,11 +50,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng adana = new LatLng(36, 34);
-        mMap.addMarker(new MarkerOptions().position(adana).title("Marker in Adana"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(adana));
+        ArrayList<Location> locations = (ArrayList<Location>) extra.getSerializable("objects");
+
+        LatLng newCoord = new LatLng(0, 0);
+        options = new MarkerOptions();
+        for (Location l : locations) {
+            newCoord = new LatLng(Double.parseDouble(l.mLatitude), Double.parseDouble(l.mLongitude));
+            options.position(newCoord);
+            options.title(l.getDate() + l.getTime());
+            options.snippet(l.getCity());
+            googleMap.addMarker(options);
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(newCoord));
     }
+
+
 
     @Override
     protected void onStart() {

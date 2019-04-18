@@ -77,7 +77,7 @@ public class FriendsFragment extends Fragment {
 
     private void setFriendsAdapter(View rootView) {
         FriendsAdapter adapter = new FriendsAdapter(getActivity(), friends, R.color.category_friends);
-        ListView listView = rootView.findViewById(R.id.list);
+        final ListView listView = rootView.findViewById(R.id.list);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -85,13 +85,13 @@ public class FriendsFragment extends Fragment {
                 //Creating the instance of PopupMenu
                 PopupMenu popup = new PopupMenu(getActivity(), view);
                 //Inflating the Popup using xml file
-                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+                popup.getMenuInflater().inflate(R.menu.popup_menu_friends, popup.getMenu());
 
                 //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        Toast.makeText(getActivity(),"You Clicked : " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "You Clicked : " + item.getTitle(), Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 });

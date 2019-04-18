@@ -1,6 +1,6 @@
 package com.example.frienderapp;
 
-public class Location {
+public class Location implements java.io.Serializable {
 
     public String mLongitude;
     public String mLatitude;

@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 public class CategoryAdapter extends FragmentPagerAdapter {
-    private String tabTitles[] = new String[]{"Friends", "Nearby", "History"};
+    private String[] tabTitles = new String[]{"Friends", "Nearby", "Location History", "History Map"};
 
     public CategoryAdapter(FragmentManager fm) {
         super(fm);
@@ -18,14 +18,16 @@ public class CategoryAdapter extends FragmentPagerAdapter {
             return new FriendsFragment();
         } else if (position == 1) {
             return new NearbyFragment();
-        } else {
+        } else if (position == 2){
             return new LocationHistoryFragment();
+        } else {
+            return new MapsFragment();
         }
     }
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Nullable

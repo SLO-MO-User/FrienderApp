@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TabLayout tabLayout = findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer,/* toolbar,*/ R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -48,6 +47,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //ImageView profileIV = findViewById(R.id.imageView);
+        //String internetUrl = currentUser.getPhotoUrl().toString();
+        //Log.i("update", "url : " + internetUrl);
+       /* Glide
+                .with(getApplicationContext())
+                .load(internetUrl)
+                .into(profileIV);*/
     }
 
     @Override
@@ -91,12 +98,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_tracker) {
             startActivity(new Intent(getApplicationContext(),
                     LocationActivity.class));
-        }
-        else if (id == R.id.nav_maps) {
+        } else if (id == R.id.nav_maps) {
             startActivity(new Intent(getApplicationContext(),
                     MapsActivity.class));
-        }
-        else if (id == R.id.nav_profile) {
+        } else if (id == R.id.nav_profile) {
             startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
         }
 

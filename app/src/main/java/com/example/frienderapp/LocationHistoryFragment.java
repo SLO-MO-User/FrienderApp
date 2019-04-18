@@ -4,7 +4,6 @@ package com.example.frienderapp;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -58,7 +57,7 @@ public class LocationHistoryFragment extends Fragment {
         assert currentUser != null;
         uid = currentUser.getUid();
 
-        Log.i("update","before call");
+        Log.i("update", "before call");
 
         locations = new ArrayList<>();
         db.collection("Locations")
@@ -69,7 +68,7 @@ public class LocationHistoryFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            Log.i("update","task success");
+                            Log.i("update", "task success");
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 //Log.d("update", document.getId() + " => " + document.getData());
                                 Object loc = document.get("LOCATION");
@@ -98,18 +97,18 @@ public class LocationHistoryFragment extends Fragment {
                                 }
 
                                 //Log.i("update", "JUST LOCATION : " + g.getLatitude() + ", " + g.getLongitude() + " time: " + format.format(d.getTime()) );
-                                locations.add(new Location(g.getLongitude() + "", g.getLatitude() + "",  s.substring(0, 10), s.substring(10), cityName));
+                                locations.add(new Location(g.getLongitude() + "", g.getLatitude() + "", s.substring(0, 10), s.substring(10), cityName));
                             }
                         } else {
                             Log.d("update", "Error getting documents: ", task.getException());
-                            Log.i("update","task failure");
+                            Log.i("update", "task failure");
                         }
                         setLocationAdapter(rootView);
                     }
                 });
 
         Log.i("update", uid);
-        Log.i("update","after size " + locations.size() + "");
+        Log.i("update", "after size " + locations.size() + "");
 
         return rootView;
     }
@@ -122,12 +121,23 @@ public class LocationHistoryFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                /*
                 Location l = locations.get(position);
-
                 Uri gmmIntentUri = Uri.parse("google.navigation:q=" + l.getLatitude() + "," + l.getLongitude());
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                 mapIntent.setPackage("com.google.android.apps.maps");
                 startActivity(mapIntent);
+                */
+
+                Bundle extra = new Bundle();
+                extra.putSerializable("objects", locations);
+
+                if (locations != null) {
+                    Intent intent = new Intent(getContext(), MapsActivity.class);
+                    intent.putExtra("extra", extra);
+                    startActivity(intent);
+                }
+
 
             }
         });
