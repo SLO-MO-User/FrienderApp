@@ -9,10 +9,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class LocationAdapter extends ArrayAdapter<Location> {
+public class LocationAdapter extends ArrayAdapter<LocationClass> {
     private int mColorResourceID;
 
-    LocationAdapter(Context context, ArrayList<Location> locations, int color) {
+    LocationAdapter(Context context, ArrayList<LocationClass> locations, int color) {
         super(context, 0, locations);
         mColorResourceID = color;
     }
@@ -27,7 +27,7 @@ public class LocationAdapter extends ArrayAdapter<Location> {
                     R.layout.location_list_item, parent, false);
         }
 
-        Location l = getItem(position);
+        LocationClass l = getItem(position);
 
         TextView longitudeTV = listItemView.findViewById(R.id.longitude_text_view);
         longitudeTV.setText((l != null) ? l.getLongitude() : null);

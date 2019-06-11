@@ -6,4 +6,8 @@
 
     <color name="category_location">#e3f2fd</color>
     <color name="category_friends">#ede7f6</color>
+
+
+    <color name="removeUpdate">#FFFFFF</color>
+    <color name="startUpdate">#FFFFFF</color>
 </resources>

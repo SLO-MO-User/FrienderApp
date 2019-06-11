@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,8 +35,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -49,22 +55,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private String uid;
 
-    private ArrayList<Location> locations;
+    private ArrayList<LocationClass> locations;
+    private ArrayList<LocationClass> locationsDateBased;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.activity_maps, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_maps, container, false);
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
         uid = currentUser.getUid();
         db = FirebaseFirestore.getInstance();
 
+
         locations = new ArrayList<>();
+        locationsDateBased = new ArrayList<>();
         db.collection("Locations")
                 .orderBy("DATE", Query.Direction.DESCENDING)
                 .whereEqualTo("USERUID", uid)
+                .limit(25)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -99,7 +109,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                                 }
 
                                 //Log.i("update", "JUST LOCATION : " + g.getLatitude() + ", " + g.getLongitude() + " time: " + format.format(d.getTime()) );
-                                locations.add(new Location(g.getLongitude() + "", g.getLatitude() + "", s.substring(0, 10), s.substring(10), cityName));
+                                locations.add(new LocationClass(g.getLongitude() + "", g.getLatitude() + "", s.substring(0, 10), s.substring(10), cityName));
                             }
                         } else {
                             Log.d("update", "Error getting documents: ", task.getException());
@@ -107,6 +117,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                         }
 
                         Log.i("update", "locations size " + locations.size() + "");
+                        setSpinnerAdapter();
                         CallTheMap();
                     }
                 });
@@ -117,7 +128,72 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         return rootView;
     }
 
+    private ArrayList<String> dateList() {
+        ArrayList<String> locationDates = new ArrayList<>();
+        for (LocationClass l : locations) {
+            locationDates.add(l.getDate());
+        }
+        Set<String> noDupSet = new LinkedHashSet<>(locationDates);
+        locationDates.clear();
+        locationDates.addAll(noDupSet);
+        return locationDates;
+    }
+
+    private void setSpinnerAdapter() {
+        Spinner dateSpinner = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            dateSpinner = Objects.requireNonNull(getActivity()).findViewById(R.id.date_selector_spinner);
+        }
+        ArrayAdapter<String> dateAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, dateList());
+        if (dateSpinner != null) {
+            dateSpinner.setAdapter(dateAdapter);
+        }
+
+        if (dateSpinner != null) {
+            dateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    String item = parent.getItemAtPosition(position).toString();
+                    Log.i("update", "item : " + item);
+                    CallTheMap(item);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    Log.i("update", "nothing selected");
+                }
+
+            });
+        }
+    }
+
+
     private void CallTheMap() {
+        if (mMap != null) {
+            mMap.clear();
+        }
+
+        locationsDateBased.clear();
+        locationsDateBased.addAll(locations);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+    }
+
+    private void CallTheMap(String date) {
+        if (mMap != null) {
+            mMap.clear();
+        }
+        locationsDateBased.clear();
+        for (LocationClass l : locations) {
+            if (l.getDate().equals(date)) {
+                locationsDateBased.add(l);
+            }
+            //Log.i("update", locationsDateBased.toString());
+        }
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
                 .findFragmentById(R.id.map);
@@ -130,14 +206,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         LatLng newCoord = new LatLng(0, 0);
         options = new MarkerOptions();
-        for (Location l : locations) {
-            newCoord = new LatLng(Double.parseDouble(l.mLatitude), Double.parseDouble(l.mLongitude));
+        for (LocationClass l : locationsDateBased) {
+            newCoord = new LatLng(Double.parseDouble(l.getLatitude()), Double.parseDouble(l.getLongitude()));
             options.position(newCoord);
             options.title(l.getDate() + l.getTime());
             options.snippet(l.getCity());
             googleMap.addMarker(options);
         }
         mMap.moveCamera(CameraUpdateFactory.newLatLng(newCoord));
-
     }
 }

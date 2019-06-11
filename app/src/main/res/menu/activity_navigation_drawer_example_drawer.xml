@@ -8,15 +8,15 @@
             android:id="@+id/nav_tracker"
             android:icon="@drawable/ic_menu_share"
             android:title="Location Tracker" />
-        <item
-            android:id="@+id/nav_maps"
-            android:icon="@drawable/ic_menu_send"
-            android:title="Maps" />
 
         <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_menu_send"
             android:title="Profile" />
+
+        <item
+            android:id="@+id/logout_item_nav"
+            android:title="Logout" />
     </group>
 
 </menu>

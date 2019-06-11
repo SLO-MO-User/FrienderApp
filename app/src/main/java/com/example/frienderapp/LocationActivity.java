@@ -19,15 +19,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +42,35 @@ public class LocationActivity extends AppCompatActivity {
     private TextView longitudeValueGPS, latitudeValueGPS;
     private TextView status;
     private String uid;
+    private final LocationListener locationListenerGPS = new LocationListener() {
+        public void onLocationChanged(final Location location) {
+            longitudeGPS = location.getLongitude();
+            latitudeGPS = location.getLatitude();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    longitudeValueGPS.setText(longitudeGPS + "");
+                    latitudeValueGPS.setText(latitudeGPS + "");
+                    Log.i("status", "Location : " + latitudeGPS + ", " + longitudeGPS);
+                    addNewContact(latitudeGPS, longitudeGPS);
+                    Toast.makeText(LocationActivity.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,30 +152,6 @@ public class LocationActivity extends AppCompatActivity {
         status.setText("Running");
     }
 
-    private final LocationListener locationListenerGPS = new LocationListener() {
-        public void onLocationChanged(final Location location) {
-            longitudeGPS = location.getLongitude();
-            latitudeGPS = location.getLatitude();
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    longitudeValueGPS.setText(longitudeGPS + "");
-                    latitudeValueGPS.setText(latitudeGPS + "");
-                    Log.i("status", "Location : " + latitudeGPS + ", " + longitudeGPS);
-                    addNewContact(latitudeGPS, longitudeGPS);
-                    Toast.makeText(LocationActivity.this, "GPS Provider update", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {  }
-        @Override
-        public void onProviderEnabled(String s) { }
-        @Override
-        public void onProviderDisabled(String s) { }
-    };
-
     public void toggleGPSUpdates_pause(View view) {
         locationManager.removeUpdates(locationListenerGPS);
         status.setText("Paused");
@@ -163,8 +165,6 @@ public class LocationActivity extends AppCompatActivity {
 
         CollectionReference locations = db.collection("Locations");
         locations.document().set(newLocation);
-        //db.collection("Locations").document().set(newLocation);
-
     }
 
     @Override

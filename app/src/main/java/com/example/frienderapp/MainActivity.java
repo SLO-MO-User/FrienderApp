@@ -48,13 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //ImageView profileIV = findViewById(R.id.imageView);
-        //String internetUrl = currentUser.getPhotoUrl().toString();
-        //Log.i("update", "url : " + internetUrl);
-       /* Glide
-                .with(getApplicationContext())
-                .load(internetUrl)
-                .into(profileIV);*/
+
     }
 
     @Override
@@ -97,12 +91,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (id == R.id.nav_tracker) {
             startActivity(new Intent(getApplicationContext(),
-                    LocationActivity.class));
-        } else if (id == R.id.nav_maps) {
-            startActivity(new Intent(getApplicationContext(),
-                    MapsActivity.class));
+                    //LocationActivity.class
+                    LocationServiceActivity.class));
         } else if (id == R.id.nav_profile) {
             startActivity(new Intent(getApplicationContext(), ProfileActivity.class));
+        } else if (id == R.id.logout_item_nav) {
+            mAuth.signOut();
+            finish();
+            startActivity(new Intent(getApplicationContext(),
+                    LoginActivity.class));
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

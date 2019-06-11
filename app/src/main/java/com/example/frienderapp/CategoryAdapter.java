@@ -18,7 +18,7 @@ public class CategoryAdapter extends FragmentPagerAdapter {
             return new FriendsFragment();
         } else if (position == 1) {
             return new NearbyFragment();
-        } else if (position == 2){
+        } else if (position == 2) {
             return new LocationHistoryFragment();
         } else {
             return new MapsFragment();

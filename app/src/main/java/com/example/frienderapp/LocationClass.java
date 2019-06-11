@@ -1,14 +1,14 @@
 package com.example.frienderapp;
 
-public class Location implements java.io.Serializable {
+public class LocationClass implements java.io.Serializable {
 
-    public String mLongitude;
-    public String mLatitude;
-    public String mDate;
-    public String mTime;
-    public String mCity;
+    private String mLongitude;
+    private String mLatitude;
+    private String mDate;
+    private String mTime;
+    private String mCity;
 
-    Location(String longitude, String latitude, String date, String time, String city) {
+    LocationClass(String longitude, String latitude, String date, String time, String city) {
         mLongitude = longitude;
         mLatitude = latitude;
         mDate = date;

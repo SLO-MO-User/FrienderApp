@@ -4,6 +4,7 @@ package com.example.frienderapp;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -44,7 +45,7 @@ public class LocationHistoryFragment extends Fragment {
     private FirebaseFirestore db;
     private String uid;
 
-    private ArrayList<Location> locations;
+    private ArrayList<LocationClass> locations;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,6 +64,7 @@ public class LocationHistoryFragment extends Fragment {
         db.collection("Locations")
                 .orderBy("DATE", Query.Direction.DESCENDING)
                 .whereEqualTo("USERUID", uid)
+                .limit(25)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -97,7 +99,7 @@ public class LocationHistoryFragment extends Fragment {
                                 }
 
                                 //Log.i("update", "JUST LOCATION : " + g.getLatitude() + ", " + g.getLongitude() + " time: " + format.format(d.getTime()) );
-                                locations.add(new Location(g.getLongitude() + "", g.getLatitude() + "", s.substring(0, 10), s.substring(10), cityName));
+                                locations.add(new LocationClass(g.getLongitude() + "", g.getLatitude() + "", s.substring(0, 10), s.substring(10), cityName));
                             }
                         } else {
                             Log.d("update", "Error getting documents: ", task.getException());
@@ -121,22 +123,25 @@ public class LocationHistoryFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                /*
-                Location l = locations.get(position);
+
+                LocationClass l = locations.get(position);
                 Uri gmmIntentUri = Uri.parse("google.navigation:q=" + l.getLatitude() + "," + l.getLongitude());
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                 mapIntent.setPackage("com.google.android.apps.maps");
                 startActivity(mapIntent);
-                */
+
 
                 Bundle extra = new Bundle();
                 extra.putSerializable("objects", locations);
 
+                /*
                 if (locations != null) {
-                    Intent intent = new Intent(getContext(), MapsActivity.class);
+
+                    Intent intent = new Intent(getContext(), SomeActivity.class);
                     intent.putExtra("extra", extra);
                     startActivity(intent);
                 }
+                */
 
 
             }

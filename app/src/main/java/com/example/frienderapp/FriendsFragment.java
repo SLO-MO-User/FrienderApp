@@ -1,6 +1,7 @@
 package com.example.frienderapp;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -12,18 +13,20 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,14 +35,11 @@ import java.util.Map;
  */
 public class FriendsFragment extends Fragment {
 
-    private static final String USERUID = "USERUID";
-    private static final String DATE = "DATE";
-    private static final String LOCATION = "LOCATION";
 
     private FirebaseFirestore db;
     private String uid;
     private String s = "";
-    List<String> list1;
+    private List<String> list1;
     private ArrayList<Friend> friends;
 
     @Override
@@ -82,23 +82,71 @@ public class FriendsFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Creating the instance of PopupMenu
+                final Friend f = friends.get(position);
+                Log.i("update", "pupup id : " + f.getUID());
+
+
                 PopupMenu popup = new PopupMenu(getActivity(), view);
-                //Inflating the Popup using xml file
                 popup.getMenuInflater().inflate(R.menu.popup_menu_friends, popup.getMenu());
 
-                //registering popup with OnMenuItemClickListener
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        Toast.makeText(getActivity(), "You Clicked : " + item.getTitle(), Toast.LENGTH_SHORT).show();
-                        return true;
+                        switch (item.getItemId()) {
+                            case R.id.unfriend_item:
+                                UnfriendPopupOption(f);
+                                return true;
+                            case R.id.message_friend_item:
+                                //message activity with extra friend uid
+                                MessagePopupOption(f);
+                                return true;
+                            default:
+                                return true;
+                        }
                     }
                 });
                 popup.show();//showing popup menu
             }
         });
     }
+
+    private void UnfriendPopupOption(final Friend friend) {
+        db.collection("Friendships").document(uid).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().getData() != null) {
+                                if (task.getResult().contains(friend.getUID())) {
+                                    unfriendFirestore(friend);
+                                }
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void unfriendFirestore(Friend friend) {
+        DocumentReference docRef = db.collection("Friendships").document(uid);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put(friend.getUID(), FieldValue.delete());
+
+        docRef.update(updates).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                Log.i("update", "unfriended");
+            }
+        });
+    }
+
+    private void MessagePopupOption(Friend friend) {
+        Intent intent = new Intent(getActivity(), MessageActivity.class);
+        Bundle b = new Bundle();
+        b.putString("fuid", friend.getUID());
+        intent.putExtras(b); //Put your id to your next Intent
+        startActivity(intent);
+    }
+
 
     private void ListFriends(final View rootView, final List<String> list2) {
         friends = new ArrayList<>();
@@ -109,11 +157,10 @@ public class FriendsFragment extends Fragment {
                     Log.i("update", "List friends task success");
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         if (list2.contains(document.getId())) {
-                            //Log.i("update", "friend name : " + document.getString("NAME"));
-                            friends.add(new Friend(document.getString("NICKNAME"), document.getString("EMAIL"), document.getString("PROFILE_IMAGE")));
+                            friends.add(new Friend(document.getString("NICKNAME"), document.getString("EMAIL"),
+                                    document.getString("PROFILE_IMAGE"), document.getId()));
                         }
                     }
-                    Log.i("update", "friends size : " + friends.size());
                     setFriendsAdapter(rootView);
                 }
             }
